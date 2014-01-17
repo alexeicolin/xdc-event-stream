@@ -26,6 +26,7 @@
 #endif
 
 #define TIMESTAMP_IN_US
+#define SHORT_LOG_EVENT
 
 static char outbuf[1024];
 static OutputFunc outputFunc = NULL;
@@ -44,11 +45,13 @@ static Void outputEvent(Log_EventRec *er)
     Bits32  hi, lo;
 #endif
 
+#ifndef SHORT_LOG_EVENT
     /* print serial number if there is one; 0 isn't a valid serial number */
     if (er->serial) {
         System_sprintf(bufPtr, SERIAL, er->serial);
         bufPtr = outbuf + strlen(outbuf);
     }
+#endif
 
     /* print timestamp if there is one; ~0 isn't a valid timestamp value */
     if (er->tstamp.hi != ~0 && er->tstamp.lo != ~0) {
@@ -58,7 +61,7 @@ static Void outputEvent(Log_EventRec *er)
         timestamp = (((UInt64)er->tstamp.hi) << 32) | ((UInt64)er->tstamp.lo);
         timestamp /= freqVal / 1000000; /* timestamp in in us */
 
-        System_sprintf(bufPtr, "[t=%s]", NumFormat_format(timestamp, 0, 10));
+        System_sprintf(bufPtr, "%s:", NumFormat_format(timestamp, 0, 10));
         bufPtr = outbuf + strlen(outbuf);
 #else
         System_sprintf(bufPtr, "[t=0x");
@@ -73,9 +76,11 @@ static Void outputEvent(Log_EventRec *er)
     }
 
     /* print module name */
+#ifndef SHORT_LOG_EVENT
     Text_putMod((Text_RopeId)Types_getModuleId(er->evt), &bufPtr, -1);
     System_sprintf(bufPtr, ": ");
     bufPtr = outbuf + strlen(outbuf);
+#endif
     
     /* print event */
     rope = Types_getEventId(er->evt);   /* the event id is the message rope */
