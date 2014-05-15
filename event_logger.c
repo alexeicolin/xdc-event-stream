@@ -37,12 +37,10 @@ static Void outputEvent(Log_EventRec *er)
     String  fmt;
     Char   *bufPtr = outbuf;
     Int     size = 0;
-#ifdef TIMESTAMP_IN_US
     UInt64 timestamp;
+#ifdef TIMESTAMP_IN_US
     Types_FreqHz freq;
     UInt64 freqVal;
-#else
-    Bits32  hi, lo;
 #endif
 
 #ifndef SHORT_LOG_EVENT
@@ -55,10 +53,11 @@ static Void outputEvent(Log_EventRec *er)
 
     /* print timestamp if there is one; ~0 isn't a valid timestamp value */
     if (er->tstamp.hi != ~0 && er->tstamp.lo != ~0) {
+        timestamp = (((UInt64)er->tstamp.hi) << 32) | ((UInt64)er->tstamp.lo);
+
 #ifdef TIMESTAMP_IN_US
         Timestamp_getFreq(&freq);
         freqVal = (((UInt64)freq.hi) << 32) | ((UInt64)freq.lo);
-        timestamp = (((UInt64)er->tstamp.hi) << 32) | ((UInt64)er->tstamp.lo);
         /* timestamp in us = timestamp in counts / freqVal * 10^6 */
         /* To perfrom that calculation in integer math, we have some cases */
 #define MICRO_MULTIPLIER 1000000
@@ -69,19 +68,10 @@ static Void outputEvent(Log_EventRec *er)
             timestamp *= MICRO_MULTIPLIER;
             timestamp /= freqVal;
         }
+#endif
 
         System_sprintf(bufPtr, "%s:", NumFormat_format(timestamp, 0, 10));
         bufPtr = outbuf + strlen(outbuf);
-#else
-        System_sprintf(bufPtr, "[t=0x");
-        bufPtr = outbuf + strlen(outbuf);
-        if (hi) {
-            System_sprintf(bufPtr, HI, hi);
-            bufPtr = outbuf + strlen(outbuf);
-        }
-        System_sprintf(bufPtr, LO, lo);
-        bufPtr = outbuf + strlen(outbuf);
-#endif
     }
 
     /* print module name */
