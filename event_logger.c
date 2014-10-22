@@ -25,6 +25,7 @@
 #error xdc.runtime.Log does not support this target. 
 #endif
 
+#define TIMESTAMP
 #define TIMESTAMP_IN_US
 #define SHORT_LOG_EVENT
 
@@ -37,10 +38,12 @@ static Void outputEvent(Log_EventRec *er)
     String  fmt;
     Char   *bufPtr = outbuf;
     Int     size = 0;
+#ifdef TIMESTAMP
     UInt64 timestamp;
 #ifdef TIMESTAMP_IN_US
     Types_FreqHz freq;
     UInt64 freqVal;
+#endif
 #endif
 
 #ifndef SHORT_LOG_EVENT
@@ -51,6 +54,7 @@ static Void outputEvent(Log_EventRec *er)
     }
 #endif
 
+#ifdef TIMESTAMP
     /* print timestamp if there is one; ~0 isn't a valid timestamp value */
     if (er->tstamp.hi != ~0 && er->tstamp.lo != ~0) {
         timestamp = (((UInt64)er->tstamp.hi) << 32) | ((UInt64)er->tstamp.lo);
@@ -73,6 +77,7 @@ static Void outputEvent(Log_EventRec *er)
         System_sprintf(bufPtr, "%s:", NumFormat_format(timestamp, 0, 10));
         bufPtr = outbuf + strlen(outbuf);
     }
+#endif
 
     /* print module name */
 #ifndef SHORT_LOG_EVENT
