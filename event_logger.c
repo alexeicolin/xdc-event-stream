@@ -25,14 +25,15 @@
 #error xdc.runtime.Log does not support this target. 
 #endif
 
-#define TIMESTAMP
-#define TIMESTAMP_IN_US
+/* #define TIMESTAMP */
+/* #define TIMESTAMP_IN_US */
 #define SHORT_LOG_EVENT
 
 static char outbuf[1024];
 static OutputFunc outputFunc = NULL;
+static UChar marker[] = {0xf0, 0x0d, 0xca, 0xfe};
 
-static Void outputEvent(Log_EventRec *er)
+static Void outputEvent(Log_EventRec *er, Int nargs)
 {
     Text_RopeId rope;
     String  fmt;
@@ -97,18 +98,30 @@ static Void outputEvent(Log_EventRec *er)
     }
     else {
         /* Log_write() event */
-        fmt = Text_ropeText(rope);
-    
         if (Text_isLoaded) {
+            fmt = Text_ropeText(rope);
+
             System_asprintf(bufPtr, fmt, er->arg[0], er->arg[1], er->arg[2],
                     er->arg[3], er->arg[4], er->arg[5], er->arg[6],
                     er->arg[7]);
             bufPtr = outbuf + strlen(outbuf);
         }
         else {
+#if 0
             System_asprintf(bufPtr, "{evt: fmt=%p, args=[0x%x, 0x%x ...]}",
                 fmt, er->arg[0], er->arg[1]);
             bufPtr = outbuf + strlen(outbuf);
+#else
+            memcpy(bufPtr, marker, sizeof(marker));
+            bufPtr += sizeof(marker);
+            memcpy(bufPtr, (UChar *)&rope, sizeof(rope));
+            bufPtr += sizeof(rope);
+            memcpy(bufPtr, (UChar *)&nargs, sizeof(UChar));
+            bufPtr += sizeof(UChar);
+            memcpy(bufPtr, er->arg, sizeof(er->arg[0]) * nargs);
+            bufPtr += sizeof(er->arg[0]) * nargs;
+#endif
+
         }
     }
 
@@ -177,7 +190,7 @@ Int EventLogger_processEvent(UChar *a, Int size)
             evrec.arg[i] = 0;
         }
 
-        outputEvent(&evrec);
+        outputEvent(&evrec, nArgs);
 
         bytesSent += nBytes;
         remainder -= nBytes;
