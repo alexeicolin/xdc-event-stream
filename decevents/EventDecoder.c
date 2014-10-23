@@ -80,5 +80,7 @@ Void EventDecoder_run()
                 System_printf(" 0x%08x", ev.arg[i]);
             System_printf("\n");
         }
+
+        System_flush();
     }
 }
