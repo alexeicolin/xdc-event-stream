@@ -25,7 +25,7 @@
 #error xdc.runtime.Log does not support this target. 
 #endif
 
-/* #define TIMESTAMP */
+#define TIMESTAMP
 /* #define TIMESTAMP_IN_US */
 #define SHORT_LOG_EVENT
 
@@ -56,6 +56,11 @@ static Void outputEvent(Log_EventRec *er, Int nargs)
 #endif
 #endif
 
+    if (!Text_isLoaded) {
+        lmemcpy(bufPtr, marker, sizeof(marker));
+        bufPtr += sizeof(marker);
+    }
+
 #ifndef SHORT_LOG_EVENT
     /* print serial number if there is one; 0 isn't a valid serial number */
     if (er->serial) {
@@ -67,6 +72,7 @@ static Void outputEvent(Log_EventRec *er, Int nargs)
 #ifdef TIMESTAMP
     /* print timestamp if there is one; ~0 isn't a valid timestamp value */
     if (er->tstamp.hi != ~0 && er->tstamp.lo != ~0) {
+#if 0
         timestamp = (((UInt64)er->tstamp.hi) << 32) | ((UInt64)er->tstamp.lo);
 
 #ifdef TIMESTAMP_IN_US
@@ -85,7 +91,15 @@ static Void outputEvent(Log_EventRec *er, Int nargs)
 #endif
 
         System_sprintf(bufPtr, "%s:", NumFormat_format(timestamp, 0, 10));
-        bufPtr = outbuf + strlen(outbuf);
+#else
+        if (Text_isLoaded) {
+            System_sprintf(bufPtr, "%010u:%010u ", er->tstamp.hi, er->tstamp.lo);
+            bufPtr = outbuf + strlen(outbuf);
+        } else {
+            lmemcpy(bufPtr, (UChar *)&er->tstamp, sizeof(er->tstamp));
+            bufPtr += sizeof(er->tstamp);
+        }
+#endif
     }
 #endif
 

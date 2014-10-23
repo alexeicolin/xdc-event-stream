@@ -1,5 +1,6 @@
 #include <xdc/std.h>
 #include <xdc/runtime/System.h>
+#include <xdc/runtime/Types.h>
 
 #include <Text.h>
 
@@ -16,6 +17,7 @@ static UChar marker[] = {0xf0, 0x0d, 0xca, 0xfe};
 /* TODO: Does it make sense to reuse Log_EventRec? */
 struct EventRec {
     UInt32 marker;
+    Types_Timestamp64 timestamp;
     UInt16 id;
     UInt8 nargs;
     UInt32 arg[8];
@@ -51,6 +53,10 @@ Void EventDecoder_run()
                 markerByte = 0;
         } while (nextMatch < sizeof(marker));
 
+        if (EventDecoder_timestamp) {
+            if ((rc = fread(&ev.timestamp, sizeof(ev.timestamp), 1, fin)) != 1)
+                err(1, "failed to read timestamp: rc %d", rc);
+        }
         if ((rc = fread(&ev.id, sizeof(ev.id), 1, fin)) != 1)
             err(1, "failed to read id: rc %d", rc);
         if ((rc = fread(&ev.nargs, sizeof(ev.nargs), 1, fin)) != 1)
@@ -70,12 +76,14 @@ Void EventDecoder_run()
                 fmt = fmtBuf;
             }
 
+            System_printf("%010u:%010u ", ev.timestamp.hi, ev.timestamp.lo);
             System_printf(fmt, ev.arg[0], ev.arg[1], ev.arg[2],
                     ev.arg[3], ev.arg[4], ev.arg[5], ev.arg[6],
                     ev.arg[7]);
             System_printf("\n");
         } else {
-            System_printf("evt: id 0x%02x nargs %d", ev.id, ev.nargs);
+            System_printf("evt: time %010u:%010u id 0x%02x nargs %d",
+                    ev.timestamp.hi, ev.timestamp.lo, ev.id, ev.nargs);
             for (i = 0; i < ev.nargs; ++i)
                 System_printf(" 0x%08x", ev.arg[i]);
             System_printf("\n");
