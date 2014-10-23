@@ -4,3 +4,9 @@
 *.d
 *.rov.xs
 bld/
+
+*.xdcenv.mak
+.dlls
+.executables
+.interfaces
+.libraries
