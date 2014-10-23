@@ -14,7 +14,9 @@
  *  ========= Text.xdc ========
  */
 
-package xdc.runtime;
+package decevents;
+
+import xdc.runtime.Types;
 
 /*!
  *  ======== Text ========
@@ -262,6 +264,8 @@ module Text {
      *  but it may be less than `len`.
      */
     Int putSite(Types.Site *site, Char **bufp, Int len);
+
+    metaonly Void setTables(Any mod, String charTabFile, String nodeTabFile);
 
 internal:
 

@@ -72,7 +72,7 @@ function module$static$init(obj)
     obj.charBase = this.charTab.$addrof(0);
     obj.nodeBase = this.nodeTab.$addrof(0);
     
-    this.genModNames();
+    /* this.genModNames(); */
 
     if (!this.isLoaded) {
         var Mem = xdc.module('xdc.runtime.Memory');
@@ -89,7 +89,7 @@ function module$view$init(view, obj)
     view.charBase = obj.charBase;
     view.charBase = obj.nodeBase;
 
-    var cfg = Program.getModuleConfig('xdc.runtime.Text');
+    var cfg = Program.getModuleConfig('decevents.Text');
 
     this.$private.charBase = obj.charBase;
     this.$private.charLast = $addr(obj.charBase + cfg.charCnt);
@@ -140,6 +140,7 @@ function defineRopeNode(left, right)
     this.nodeTab.$add({left: left, right: right});
     this.nodeCnt++;
 
+    throw "Modified!";
     return (nid);
 }
 
@@ -166,7 +167,7 @@ function fetchAddr(raddr)
  */
 function fetchCord(cid)
 {
-    var cfg = Program.getModuleConfig('xdc.runtime.Text');
+    var cfg = Program.getModuleConfig('decevents.Text');
     var res = "";
 
     for (var i = cid; cfg.charTab[i]; res += String.fromCharCode(cfg.charTab[i++])) ;
@@ -179,7 +180,7 @@ function fetchCord(cid)
  */
 function fetchId(rid)
 {
-    var cfg = Program.getModuleConfig('xdc.runtime.Text');
+    var cfg = Program.getModuleConfig('decevents.Text');
     return (
         (rid & 0x8000) ? this.fetchNode(rid & ~0x8000) : this.fetchCord(rid)
     );
@@ -190,7 +191,7 @@ function fetchId(rid)
  */
 function fetchNode(nid)
 {
-    var cfg = Program.getModuleConfig('xdc.runtime.Text');
+    var cfg = Program.getModuleConfig('decevents.Text');
     var node = cfg.nodeTab[nid];
 
     return (this.fetchId(node.left) + this.fetchId(node.right));
@@ -278,6 +279,20 @@ function genPkgName(qn)
 
     return (nid);
 }
+
+function setTables(mod, charTabFile, nodeTabFile)
+{
+    var fileUtils = xdc.loadCapsule('FileUtils.xs');
+
+    mod.charTab = fileUtils.readToArray(charTabFile);
+    var nodeTabData = fileUtils.readToArray(nodeTabFile);
+    var nodeTab = [];
+    for (var i = 0; i < nodeTabData.length - 1; i+=2) {
+        nodeTab.push({left: nodeTabData[i], right: nodeTabData[i+1]});
+    }
+    mod.nodeTab = nodeTab;
+}
+
 /*
  *  @(#) xdc.runtime; 2, 1, 0,438; 12-19-2013 19:53:38; /db/ztree/library/trees/xdc/xdc-z63x/src/packages/
  */
