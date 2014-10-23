@@ -33,6 +33,15 @@ static char outbuf[1024];
 static OutputFunc outputFunc = NULL;
 static UChar marker[] = {0xf0, 0x0d, 0xca, 0xfe};
 
+/* Local memcpy: the real one doesn't exist when building for M4F (?) */
+static Void lmemcpy(Char *dest, UChar *src, Int n)
+{
+    do {
+        --n;
+        dest[n] = src[n];
+    } while (n);
+}
+
 static Void outputEvent(Log_EventRec *er, Int nargs)
 {
     Text_RopeId rope;
@@ -112,13 +121,11 @@ static Void outputEvent(Log_EventRec *er, Int nargs)
                 fmt, er->arg[0], er->arg[1]);
             bufPtr = outbuf + strlen(outbuf);
 #else
-            memcpy(bufPtr, marker, sizeof(marker));
-            bufPtr += sizeof(marker);
-            memcpy(bufPtr, (UChar *)&rope, sizeof(rope));
+            lmemcpy(bufPtr, (UChar *)&rope, sizeof(rope));
             bufPtr += sizeof(rope);
-            memcpy(bufPtr, (UChar *)&nargs, sizeof(UChar));
-            bufPtr += sizeof(UChar);
-            memcpy(bufPtr, er->arg, sizeof(er->arg[0]) * nargs);
+            lmemcpy(bufPtr, (UChar *)&nargs, sizeof(Char));
+            bufPtr += sizeof(Char);
+            lmemcpy(bufPtr, (UChar *)er->arg, sizeof(er->arg[0]) * nargs);
             bufPtr += sizeof(er->arg[0]) * nargs;
 #endif
 
