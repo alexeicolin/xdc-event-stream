@@ -1,0 +1,7 @@
+var Build = xdc.useModule('xdc.bld.BuildEnvironment');
+var Pkg = xdc.useModule('xdc.bld.PackageContents');
+
+for each (var targ in Build.targets) {
+    var exec = Pkg.addExecutable("eventgen", targ, targ.platform)
+    exec.addObjects(["eventgen.c"]);
+}
