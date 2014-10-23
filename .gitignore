@@ -6,7 +6,9 @@
 bld/
 
 *.xdcenv.mak
-.dlls
-.executables
-.interfaces
-.libraries
+.dlls*
+.executables*
+.interfaces*
+.libraries*
+
+*.x86U

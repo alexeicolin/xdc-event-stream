@@ -1,0 +1,5 @@
+var Build = xdc.useModule('xdc.bld.BuildEnvironment');
+var GCC = xdc.useModule('gnu.targets.Linux86');
+GCC.rootDir = '/usr';
+GCC.ccOpts.prefix = "-O0";
+Build.targets = [GCC];

@@ -1,0 +1,11 @@
+var Build = xdc.useModule('xdc.bld.BuildEnvironment');
+var Pkg = xdc.useModule('xdc.bld.PackageContents');
+
+ 
+for each (var targ in Build.targets) {
+    var lib = Pkg.addLibrary("lib/" + Pkg.name, targ)
+    lib.addObjects(["Text.c", "EventDecoder.c"])
+
+    var exec = Pkg.addExecutable("decevents", targ, targ.platform)
+    exec.addObjects(["decevents.c"]);
+}
