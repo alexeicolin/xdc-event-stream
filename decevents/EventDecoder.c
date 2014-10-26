@@ -64,6 +64,8 @@ Void EventDecoder_run()
             err(1, "failed to read id: rc %d", rc);
         if ((rc = fread(&ev.nargs, sizeof(ev.nargs), 1, fin)) != 1)
             err(1, "failed to read nargs: rc %d", rc);
+        if (ev.nargs > sizeof(ev.arg) / sizeof(ev.arg[0]))
+            errx(1, "invalid narg value in trace: %d", ev.nargs);
         if ((rc = fread(&ev.arg, sizeof(ev.arg[0]), ev.nargs, fin)) != ev.nargs)
             err(1, "failed to read args: rc %d", rc);
 
