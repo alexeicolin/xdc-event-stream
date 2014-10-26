@@ -120,10 +120,14 @@ static Void outputEvent(Log_EventRec *er, Int nargs)
     rope = Types_getEventId(er->evt);   /* the event id is the message rope */
     if (rope == 0) {
         /* Log_print() event */
-        System_asprintf(bufPtr, (String)iargToPtr(er->arg[0]),
-            er->arg[1], er->arg[2], er->arg[3], er->arg[4], 
-            er->arg[5], er->arg[6], 0, 0);
-        bufPtr = outbuf + strlen(outbuf);
+        if (Text_isLoaded) {
+            System_asprintf(bufPtr, (String)iargToPtr(er->arg[0]),
+                er->arg[1], er->arg[2], er->arg[3], er->arg[4],
+                er->arg[5], er->arg[6], 0, 0);
+            bufPtr = outbuf + strlen(outbuf);
+        } else {
+            bufPtr = outbuf; /* erase begging of this event, and skip it */
+        }
     }
     else {
         /* Log_write() event */
