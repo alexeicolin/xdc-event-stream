@@ -18,6 +18,7 @@ static UChar marker[] = {0xf0, 0x0d, 0xca, 0xfe};
 struct EventRec {
     UInt32 marker;
     Types_Timestamp64 timestamp;
+    UInt16 modid;
     UInt16 id;
     UInt8 nargs;
     UInt32 arg[8];
@@ -57,6 +58,8 @@ Void EventDecoder_run()
             if ((rc = fread(&ev.timestamp, sizeof(ev.timestamp), 1, fin)) != 1)
                 err(1, "failed to read timestamp: rc %d", rc);
         }
+        if ((rc = fread(&ev.modid, sizeof(ev.modid), 1, fin)) != 1)
+            err(1, "failed to read module id: rc %d", rc);
         if ((rc = fread(&ev.id, sizeof(ev.id), 1, fin)) != 1)
             err(1, "failed to read id: rc %d", rc);
         if ((rc = fread(&ev.nargs, sizeof(ev.nargs), 1, fin)) != 1)
