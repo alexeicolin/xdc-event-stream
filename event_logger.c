@@ -36,6 +36,8 @@ static UChar marker[] = {0xf0, 0x0d, 0xca, 0xfe};
 /* Local memcpy: the real one doesn't exist when building for M4F (?) */
 static Void lmemcpy(Char *dest, UChar *src, Int n)
 {
+    if (!n)
+        return;
     do {
         --n;
         dest[n] = src[n];
