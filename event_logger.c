@@ -125,6 +125,7 @@ static Void outputEvent(Log_EventRec *er, Int nargs)
                 er->arg[1], er->arg[2], er->arg[3], er->arg[4],
                 er->arg[5], er->arg[6], 0, 0);
             bufPtr = outbuf + strlen(outbuf);
+            *bufPtr++ = '\n';
         } else {
             bufPtr = outbuf; /* erase begging of this event, and skip it */
         }
@@ -138,6 +139,7 @@ static Void outputEvent(Log_EventRec *er, Int nargs)
                     er->arg[3], er->arg[4], er->arg[5], er->arg[6],
                     er->arg[7]);
             bufPtr = outbuf + strlen(outbuf);
+            *bufPtr++ = '\n';
         }
         else {
 #if 0
@@ -156,7 +158,6 @@ static Void outputEvent(Log_EventRec *er, Int nargs)
         }
     }
 
-    *bufPtr++ = '\n';
     size = bufPtr - outbuf;
 
     Assert_isTrue(outputFunc, NULL);
