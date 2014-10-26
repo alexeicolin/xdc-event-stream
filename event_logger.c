@@ -106,11 +106,15 @@ static Void outputEvent(Log_EventRec *er, Int nargs)
 #endif
 
     /* print module name */
-#ifndef SHORT_LOG_EVENT
-    Text_putMod((Text_RopeId)Types_getModuleId(er->evt), &bufPtr, -1);
-    System_sprintf(bufPtr, ": ");
-    bufPtr = outbuf + strlen(outbuf);
-#endif
+    rope = Types_getModuleId(er->evt);
+    if (Text_isLoaded) {
+        Text_putMod(rope, &bufPtr, -1);
+        System_sprintf(bufPtr, ": ");
+        bufPtr = outbuf + strlen(outbuf);
+    } else {
+        lmemcpy(bufPtr, (UChar *)&rope, sizeof(rope));
+        bufPtr += sizeof(rope);
+    }
     
     /* print event */
     rope = Types_getEventId(er->evt);   /* the event id is the message rope */
