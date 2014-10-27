@@ -89,7 +89,7 @@ function module$view$init(view, obj)
     view.charBase = obj.charBase;
     view.charBase = obj.nodeBase;
 
-    var cfg = Program.getModuleConfig('decevents.Text');
+    var cfg = Program.getModuleConfig('eventstream.Text');
 
     this.$private.charBase = obj.charBase;
     this.$private.charLast = $addr(obj.charBase + cfg.charCnt);
@@ -167,7 +167,7 @@ function fetchAddr(raddr)
  */
 function fetchCord(cid)
 {
-    var cfg = Program.getModuleConfig('decevents.Text');
+    var cfg = Program.getModuleConfig('eventstream.Text');
     var res = "";
 
     for (var i = cid; cfg.charTab[i]; res += String.fromCharCode(cfg.charTab[i++])) ;
@@ -180,7 +180,7 @@ function fetchCord(cid)
  */
 function fetchId(rid)
 {
-    var cfg = Program.getModuleConfig('decevents.Text');
+    var cfg = Program.getModuleConfig('eventstream.Text');
     return (
         (rid & 0x8000) ? this.fetchNode(rid & ~0x8000) : this.fetchCord(rid)
     );
@@ -191,7 +191,7 @@ function fetchId(rid)
  */
 function fetchNode(nid)
 {
-    var cfg = Program.getModuleConfig('decevents.Text');
+    var cfg = Program.getModuleConfig('eventstream.Text');
     var node = cfg.nodeTab[nid];
 
     return (this.fetchId(node.left) + this.fetchId(node.right));
@@ -282,7 +282,7 @@ function genPkgName(qn)
 
 function setTables(mod, charTabFile, nodeTabFile)
 {
-    var fileUtils = xdc.loadCapsule('FileUtils.xs');
+    var fileUtils = xdc.loadCapsule('eventstream/FileUtils.xs');
 
     mod.charTab = fileUtils.readToArray(charTabFile);
     var nodeTabData = fileUtils.readToArray(nodeTabFile);

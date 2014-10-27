@@ -14,7 +14,7 @@
  *  ========= Text.xdc ========
  */
 
-package decevents;
+package eventstream;
 
 import xdc.runtime.Types;
 

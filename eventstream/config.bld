@@ -4,4 +4,8 @@ var GCC = xdc.useModule('gnu.targets.Linux86');
 GCC.rootDir = '/usr';
 GCC.ccOpts.prefix = "-O0";
 
-Build.targets = [GCC];
+var GCCARM = xdc.useModule('gnu.targets.arm.M4F');
+GCCARM.rootDir ='/usr';
+GCCARM.ccOpts.prefix = "-O0 -ggdb";
+
+Build.targets = [GCC,GCCARM];

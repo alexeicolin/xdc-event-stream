@@ -14,19 +14,19 @@
 %%}
 
 /*
- *  ======== decevents_Text_visitRope__I ========
+ *  ======== eventstream_Text_visitRope__I ========
  *  This function is indirectly called within Text.c through
  *  the visitRopeFxn configuration parameter of xdc.runtime.Text.
  */
-Void decevents_Text_visitRope__I(decevents_Text_RopeId rope,
+Void eventstream_Text_visitRope__I(eventstream_Text_RopeId rope,
     xdc_Fxn visFxn, xdc_Ptr visState)
 {
 %if (this.isLoaded) {
     xdc_String stack[`this.$capsule.maxDepth + 1`];
-    decevents_Text_visitRope2__I(rope, visFxn, visState, stack);
+    eventstream_Text_visitRope2__I(rope, visFxn, visState, stack);
 %}
 %else {
-    ((decevents_Text_MatchVisState *)visState)->res = -1;
+    ((eventstream_Text_MatchVisState *)visState)->res = -1;
 %}
 }
 
