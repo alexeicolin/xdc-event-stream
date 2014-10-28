@@ -127,7 +127,15 @@ static UInt formatEvent(Char *bufPtr, Log_EventRec *er, Int nargs)
             bufPtr = outbuf + strlen(outbuf);
             *bufPtr++ = '\n';
         } else {
-            bufPtr = outbuf; /* erase begging of this event, and skip it */
+            nargs--; /* don't count arg[0], the format string */
+            lmemcpy(bufPtr, (UChar *)&rope, sizeof(rope));
+            bufPtr += sizeof(rope);
+            lmemcpy(bufPtr, (UChar *)&nargs, sizeof(Char));
+            bufPtr += sizeof(Char);
+            lmemcpy(bufPtr, (UChar *)&er->arg[1], sizeof(er->arg[0]) * nargs);
+            bufPtr += sizeof(er->arg[0]) * nargs;
+            strcpy(bufPtr, (Char *)iargToPtr(er->arg[0]));
+            bufPtr += strlen((Char *)iargToPtr(er->arg[0])) + 1; /* for null byte */
         }
     }
     else {

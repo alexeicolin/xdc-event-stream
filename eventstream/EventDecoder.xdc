@@ -30,6 +30,9 @@ module EventDecoder {
     config Error.Id E_readArgs = {
         msg: "failed to read args (len %d): rc %d"
     };
+    config Error.Id E_readFmtString = {
+        msg: "failed to read fmt string byte: rc %d"
+    };
     config Error.Id E_invalidNumArgs = {
         msg: "invalid num args: %d (max %d)"
     };

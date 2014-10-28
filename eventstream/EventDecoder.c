@@ -15,7 +15,7 @@ Int EventDecoder_readEvent(Char *fmt, Int fmtLen,
 {
     Int rc, i, len, actualFmtLen;
     String  textFmt;
-    Char *sarg, *unresolvedFmt, *argFmt;
+    Char *sarg, *unresolvedFmt, *argFmt, *fmtp;
     UChar markerByte;
     Int nextMatch = 0;
     const Int maxArgs = sizeof(ev->arg) / sizeof(ev->arg[0]);
@@ -78,20 +78,31 @@ Int EventDecoder_readEvent(Char *fmt, Int fmtLen,
         return rc;
     }
 
-    if (EventDecoder_resolveStrings) {
-        textFmt = Text_ropeText(ev->id);
-        strncpy(fmt, textFmt, fmtLen - 1);
-    } else {
-        unresolvedFmt = "id 0x%04x nargs %d:";
-        argFmt = " 0x%%08x";
-        actualFmtLen = strlen(unresolvedFmt) + 8 + 10 + ev->nargs * strlen(argFmt);
-        if (fmtLen <= actualFmtLen) {
-            Error_raise(eb, EventDecoder_E_fmtBufTooSmall, fmtLen, actualFmtLen);
-            return -1;
+    if (ev->id) { /* Log_write */
+        if (EventDecoder_resolveStrings) {
+            textFmt = Text_ropeText(ev->id);
+            strncpy(fmt, textFmt, fmtLen - 1);
+        } else {
+            unresolvedFmt = "id 0x%04x nargs %d:";
+            argFmt = " 0x%%08x";
+            actualFmtLen = strlen(unresolvedFmt) + 8 + 10 + ev->nargs * strlen(argFmt);
+            if (fmtLen <= actualFmtLen) {
+                Error_raise(eb, EventDecoder_E_fmtBufTooSmall, fmtLen, actualFmtLen);
+                return -1;
+            }
+            System_asprintf(fmt, unresolvedFmt, ev->id, ev->nargs);
+            for (i = 0; i < ev->nargs; ++i)
+                strcat(fmt, argFmt);
         }
-        System_asprintf(fmt, unresolvedFmt, ev->id, ev->nargs);
-        for (i = 0; i < ev->nargs; ++i)
-            strcat(fmt, argFmt);
+    } else { /* Log_print */
+        /* Format string is in the event stream data: read it byte by byte */
+        fmtp = fmt;
+        do {
+            if ((rc = EventDecoder_readFunc((UChar *)fmtp, 1)) != 1) {
+                Error_raise(eb, EventDecoder_E_readFmtString, 1, rc);
+                return rc;
+            }
+        } while (*fmtp++);
     }
 
     /* Replace '%s' with '%p' because we ain't got the static strings */
