@@ -40,7 +40,7 @@ static Void lmemcpy(Char *dest, UChar *src, Int n)
     } while (n);
 }
 
-static Int formatEvent(Char *bufPtr, Log_EventRec *er, Int nargs)
+static UInt formatEvent(Char *bufPtr, Log_EventRec *er, Int nargs)
 {
     Text_RopeId rope;
     String  fmt;
@@ -172,7 +172,7 @@ Int EventEncoder_writeEvent(UChar *a, Int size)
     Int     nArgs;
     Int     bytesSent = 0;
     Int     remainder = size;
-    Int     fmtedEventLen = 0;
+    UInt    fmtedEventLen = 0;
 
     logRec = (UInt32 *)a;
 
