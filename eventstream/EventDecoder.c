@@ -34,7 +34,7 @@ Int EventDecoder_readEvent(Char *fmt, Int fmtLen,
         if (markerByte == EventRecord_eventMarker[nextMatch])
             nextMatch++;
         else
-            markerByte = 0;
+            nextMatch = 0;
     } while (nextMatch < EventRecord_eventMarkerLen);
 
     if (EventRecord_hasSerial) {
