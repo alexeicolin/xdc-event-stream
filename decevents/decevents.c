@@ -41,7 +41,9 @@ Int main(Int argc, Char* argv[])
     Error_init(&eb);
 
     while ((numEvents = EventDecoder_readEvent(fmt, sizeof(fmt), &ev, &eb)) > 0) {
-        System_printf("%010u:%010u %d ", ev.timestamp.hi, ev.timestamp.lo, ev.modid);
+        System_printf("%010u:%010u ", ev.timestamp.hi, ev.timestamp.lo);
+        if (EventRecord_hasModuleId)
+            System_printf("%d ", ev.modid);
         System_printf(fmt, ev.arg[0], ev.arg[1], ev.arg[2],
                 ev.arg[3], ev.arg[4], ev.arg[5], ev.arg[6],
                 ev.arg[7]);
