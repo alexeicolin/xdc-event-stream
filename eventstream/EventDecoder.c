@@ -106,8 +106,16 @@ Int EventDecoder_readEvent(Char *fmt, Int fmtLen,
     }
 
     /* Replace '%s' with '%p' because we ain't got the static strings */
-    if ((sarg = strstr(fmt, "%s")) != NULL)
+    sarg = fmt;
+    while ((sarg = strstr(sarg, "%s")) != NULL)
         fmt[sarg - fmt + 1] = 'p';
+
+    /* Assert failures generate a event with fmt string '%$F%$S', which
+     * probably has to do with XDC-specific printf functionality, but
+     * in any case it crashes the decoder, so sanitize it. */
+    sarg = fmt;
+    while ((sarg = strstr(sarg, "%$")) != NULL)
+        fmt[sarg - fmt + 1] = '%';
 
     return 1; /* read one event */
 }
