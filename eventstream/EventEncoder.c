@@ -92,8 +92,19 @@ static UInt formatEvent(Char *bufPtr, Log_EventRec *er, Int nargs)
             }
             else { /* EventRecord_TimestampMode_RAW */
                 if (!EventEncoder_binaryOutput) {
+#if 0
                     System_sprintf(bufPtr, "%010u:%010u ",
                                    er->tstamp.hi, er->tstamp.lo);
+#else
+                    /* TODO: this logic is duplicated in decevents app */
+                    System_sprintf(bufPtr, "%05u:%05u:%010u ",
+                        /* Up-to-date ticks in Clock module state */
+                        er->tstamp.hi >> 16,
+                        /* Timestamp ticks: together with current timer value
+                         * makes up the elapsed time. */
+                        er->tstamp.hi & 0xffff,
+                        er->tstamp.lo);
+#endif
                     bufPtr = outbuf + strlen(outbuf);
                 } else {
                     lmemcpy(bufPtr, (UChar *)&er->tstamp, sizeof(er->tstamp));
