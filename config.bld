@@ -1,0 +1,16 @@
+var Build = xdc.useModule('xdc.bld.BuildEnvironment');
+
+var GCC = xdc.useModule('gnu.targets.Linux86');
+GCC.rootDir = '/usr';
+GCC.ccOpts.prefix = " -O0 -ggdb ";
+
+var GCCARM = xdc.useModule('gnu.targets.arm.M4F');
+GCCARM.platform = 'ti.platforms.tiva:TM4C123GH6PM:1';
+GCCARM.rootDir ='/usr';
+GCCARM.ccOpts.prefix = " -O0 -ggdb ";
+
+if (Pkg.name == "decevents") { // decoder runs only on the host
+    Build.targets = [GCC];
+} else {
+    Build.targets = [GCC, GCCARM];
+}
