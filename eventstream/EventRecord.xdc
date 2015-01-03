@@ -16,21 +16,20 @@ module EventRecord {
 
     enum TimestampMode {
         TimestampMode_NONE,
-        TimestampMode_RAW, /* Clock_ticks:Timer_counter */
         TimestampMode_US, /* in microseconds: ticks are converted based on freq */
-        TimestampMode_COUNTS /* in timer counts */
+        TimestampMode_COUNTS, /* in timer counts */
+        TimestampMode_RAW /* Clock_ticks:Timer_counter */
     };
 
     config UChar eventMarker[] = [0xf0, 0x0d, 0xca, 0xfe];
     config Int eventMarkerLen; /* set in module$meta$init */
 
     /* What kind of timestamp to include in the event data for each event */
-    config TimestampMode hasTimestamp = TimestampMode_RAW;
+    config TimestampMode hasTimestamp = TimestampMode_NONE;
 
     /* Whether to include a serial number into each event (if one is valid) */
     config Bool hasSerial = false;
 
     /* Whether to include the source module id number into each event */
     config Bool hasModuleId = true;
-
 }
