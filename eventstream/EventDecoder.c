@@ -20,6 +20,8 @@ Int EventDecoder_readEvent(Char *fmt, Int fmtLen,
     Int nextMatch = 0;
     const Int maxArgs = sizeof(ev->arg) / sizeof(ev->arg[0]);
 
+    memset(ev, 0, sizeof(*ev));
+
     /* Read byte-by-byte until lock in on the marker */
     nextMatch = 0;
     do {
