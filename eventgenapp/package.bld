@@ -1,7 +1,93 @@
 var Build = xdc.useModule('xdc.bld.BuildEnvironment');
 var Pkg = xdc.useModule('xdc.bld.PackageContents');
 
+var PROFILE = "debug";
+
+// Since TivaWare is not an RTSC component, we need to add it manually
+var INCS = {"M4F": "-I$(TIVAWARE_INSTALLATION_DIR)"};
+var DEFS = {"M4F": "-DTIVAWARE -D PART_TM4C123GH6PM"};
+var LOPTS = {"M4F": "-L$(TIVAWARE_INSTALLATION_DIR)/driverlib/gcc -ldriver"};
+
+/* We build several binaries, branched on: */
+/* (1) which event logger is used, */
+/* (2) where to forward events: to eventstream.EventEncoder or to the
+ *     default destination where the logger puts them if the logger
+ *     has such a default (so far this default is System_printf). */
+var CONFIGS = {
+    "LoggerSys":      ["stdout"          ],
+    "LoggerCallback": [          "stream"],
+    "LoggerBuf":      ["stdout", "stream"],
+    "LoggerIdle":     [          "stream"],
+};
+
+// Command line args passed via 'xdc XDCARGS="logger1-destA logger2-desB"'
+var arg_configs = {};
+for (var i = 0; i < arguments.length; ++i) {
+    tokens = arguments[i].toString().split("-"); // logger[-dest]
+    logger = tokens[0];
+    if (tokens.length > 1)
+        dest = tokens[1];
+
+    if (!(logger in CONFIGS))
+       throw "Unknown logger type: " + logger;
+    if (dest) {
+        if (CONFIGS[logger].indexOf(dest) < 0)
+            throw "Logger " + logger + " does not support event destination: " +
+                dest + " (supported: " + CONFIGS[logger] + ")";
+
+        if (!(logger in arg_configs))
+            arg_configs[logger] = [];
+        arg_configs[logger].push(dest);
+    } else {
+        arg_configs[logger] = CONFIGS[logger];
+    }
+}
+
+if (arguments.length == 0)
+    arg_configs = CONFIGS;
+ 
 for each (var targ in Build.targets) {
-    var exec = Pkg.addExecutable("eventgen", targ, targ.platform)
-    exec.addObjects(["eventgen.c"]);
+    for (var logger in arg_configs) {
+
+        // No SYSBIOS on x86
+        if (logger == "LoggerIdle" && targ.isa == "i686")
+            continue;
+
+        for (var j = 0; j < arg_configs[logger].length; ++j) {
+            var dest = arg_configs[logger][j];
+
+            var execName = "eventgen-" + logger + "-" + dest;
+
+            var execAttrs = {
+                profile: PROFILE,
+                incs: INCS[targ.name],
+                defs: DEFS[targ.name],
+                lopts: LOPTS[targ.name],
+                cfgScript: "eventgen.cfg",
+                cfgArgs: "{" +
+                            "eventLogger: " + "'" + logger + "'" + "," +
+                            "eventDest: " + "'" + dest + "'" +
+                            "}",
+            };
+            var exec = Pkg.addExecutable(execName, targ, targ.platform, execAttrs)
+            exec.addObjects(["eventgen.c"]);
+        }
+    }
+
+    var libAttrs = {
+        profile: PROFILE,
+        incs: INCS[targ.name],
+        defs: DEFS[targ.name],
+    };
+
+    var lib = Pkg.addLibrary("lib/" + Pkg.name, targ)
+    lib.addObjects(["OutputChannel.c"], libAttrs);
+
+    var lib = Pkg.addLibrary("lib/console_channel", targ)
+    lib.addObjects(["ConsoleChannel.c"], libAttrs);
+
+    if (targ.name == "M4F") {
+        var lib = Pkg.addLibrary("lib/tiva_uart_channel", targ)
+        lib.addObjects(["TivaUartChannel.c"], libAttrs);
+    }
 }
