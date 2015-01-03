@@ -9,6 +9,12 @@ GCCARM.platform = 'ti.platforms.tiva:TM4C123GH6PM:1';
 GCCARM.rootDir ='/usr';
 GCCARM.ccOpts.prefix = " -O0 -ggdb ";
 
+// This is a workaround: app package cfg adds the same library via Executable
+// Attrs.lopts but it gets appended before the object files, but for linker to
+// search the library it must appear after the object files that need it.
+if (Pkg.name == "eventgenapp")
+    GCCARM.lnkOpts.suffix += " -ldriver ";
+
 if (Pkg.name == "decevents") { // decoder runs only on the host
     Build.targets = [GCC];
 } else {
