@@ -56,7 +56,7 @@ Int main(Int argc, Char* argv[])
                 break;
         }
         if (EventRecord_hasModuleId)
-            System_printf("%d ", ev.modid);
+            System_printf("0x%04x ", ev.modid);
         System_printf(fmt, ev.arg[0], ev.arg[1], ev.arg[2],
                 ev.arg[3], ev.arg[4], ev.arg[5], ev.arg[6],
                 ev.arg[7]);
