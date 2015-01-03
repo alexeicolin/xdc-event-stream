@@ -12,7 +12,7 @@ module EventGen
 {
     config Log.Event LM_event = {
         mask: Diags.USER1,
-        msg: "LM_event: arg 0x%08x"
+        msg: "LM_event: the answer is 0x%08x"
     };
 
     Void genEvent(UArg arg);
