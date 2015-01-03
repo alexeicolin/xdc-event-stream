@@ -4,7 +4,6 @@
 #include <xdc/runtime/Log.h>
 #include <xdc/runtime/Text.h>
 #include <xdc/runtime/Timestamp.h>
-#include <ti/uia/runtime/EventHdr.h>
 
 #include <EventRecord.h>
 #include <NumFormat.h>
@@ -40,7 +39,7 @@ static Void lmemcpy(Char *dest, UChar *src, Int n)
     } while (n);
 }
 
-static UInt formatEvent(Char *bufPtr, Log_EventRec *er, Int nargs)
+static UInt encodeEvent(Char *bufPtr, Log_EventRec *er, Int nargs)
 {
     Text_RopeId rope;
     String  fmt;
@@ -173,70 +172,10 @@ static UInt formatEvent(Char *bufPtr, Log_EventRec *er, Int nargs)
     return bufPtr - outbuf;
 }
 
-/* Parses the event from raw binary data in the UIA/LoggerIdle format into
- * a locally defined structure, then formats it back into binary data using
- * the formatEvent function. Somewhat inefficient, but decouples the encoding
- * of the output stream (particularly, the binary stream) from the
- * UIA/LoggerIdle format parsing. This makes it easier to modify the latter. */
-Int EventEncoder_writeEvent(UChar *a, Int size)
+Void EventEncoder_writeEvent(Log_EventRec *ev, Int nargs)
 {
-    Log_EventRec evrec;
-    EventHdr_HdrType hdrType;
-    Int     i;
-    Int     nBytes;
-    Int     nWords;
-    UInt32 *wordPtr;
-    UInt32 *logRec;
-    UInt32 *args;
-    Int     nArgs;
-    Int     bytesSent = 0;
-    Int     remainder = size;
-    UInt    fmtedEventLen = 0;
-
-    logRec = (UInt32 *)a;
-
-    while (remainder > 0) {
-        wordPtr = logRec;
-        hdrType = EventHdr_getHdrType(*wordPtr);
-        nBytes = EventHdr_getLength(*wordPtr);
-        nWords = nBytes / 4;
-
-        evrec.serial = EventHdr_getSeqCount(*wordPtr);
-
-        if (hdrType == EventHdr_HdrType_EventWithTimestamp) {
-            evrec.evt = *(wordPtr + 3);
-            evrec.tstamp.hi = *(wordPtr + 2);
-            evrec.tstamp.lo = *(wordPtr + 1);
-            args = wordPtr + 4;
-            nArgs = nWords - 4;
-        }
-        else {
-            evrec.evt = *(wordPtr + 1);
-            evrec.tstamp.hi = 0;
-            evrec.tstamp.lo = 0;
-            args = wordPtr + 2;
-            nArgs = nWords - 2;
-        }
-
-        if (nArgs > Log_NUMARGS) {
-            /* Bad event header! */
-            nArgs = Log_NUMARGS;
-        }
-
-        for (i = 0; i < nArgs; i++) {
-            evrec.arg[i] = *(args + i);
-        }
-        for (i = nArgs; i < Log_NUMARGS; i++) {
-            evrec.arg[i] = 0;
-        }
-
-        fmtedEventLen = formatEvent(outbuf, &evrec, nArgs);
-        EventEncoder_outputFunc(outbuf, fmtedEventLen);
-
-        bytesSent += nBytes;
-        remainder -= nBytes;
-        logRec += nWords;
-    }
-
-    return (bytesSent);
+    UInt encodedLen = 0;
+    encodedLen = encodeEvent(outbuf, ev, nargs);
+    EventEncoder_outputFunc(outbuf, encodedLen);
 }
+

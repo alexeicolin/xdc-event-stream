@@ -1,5 +1,7 @@
 package eventstream;
 
+import xdc.runtime.Log;
+
 module EventEncoder {
     typedef Void (*OutputFunc)(Char *, UInt);
 
@@ -13,6 +15,6 @@ module EventEncoder {
      * to the UART or elsewhere. */
     config OutputFunc outputFunc = null;
 
-    /* The callback to be given to LoggerIdle */
-    Int writeEvent(UChar *a, Int size);
+    /* Packages event binary data and passes to 'outputFunc'. */
+    Void writeEvent(Log.EventRec *ev, Int nargs);
 }

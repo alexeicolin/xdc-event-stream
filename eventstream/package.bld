@@ -1,8 +1,27 @@
 var Build = xdc.useModule('xdc.bld.BuildEnvironment');
 var Pkg = xdc.useModule('xdc.bld.PackageContents');
 
+// Supports passing in XDCARGS a list of loggers for which to build adapters
+
+libAttrs = {profile: "debug"};
+
 for each (var targ in Build.targets) {
     var lib = Pkg.addLibrary("lib/" + Pkg.name, targ)
-    lib.addObjects(["Text.c", "NumFormat.c", "EventDecoder.c", "EventEncoder.c" ],
-            {profile: 'debug'})
+    lib.addObjects(["Text.c", "NumFormat.c", "EventDecoder.c", "EventEncoder.c"],
+            libAttrs);
+
+    /* Seperate libraries to avoid false dependencies */
+
+    if (arguments.length == 0 || arguments.indexOf("LoggerCallback") >= 0) {
+        var lib = Pkg.addLibrary("lib/logger_callback_adapter", targ)
+        lib.addObjects(["LoggerCallbackAdapter.c"], libAttrs);
+    }
+    if (arguments.length == 0 || arguments.indexOf("LoggerBuf") >= 0) {
+        var lib = Pkg.addLibrary("lib/logger_buf_adapter", targ)
+        lib.addObjects(["LoggerBufAdapter.c"], libAttrs);
+    }
+    if (arguments.length == 0 || arguments.indexOf("LoggerIdle") >= 0) {
+        var lib = Pkg.addLibrary("lib/logger_idle_adapter", targ)
+        lib.addObjects(["LoggerIdleAdapter.c"], libAttrs);
+    }
 }
