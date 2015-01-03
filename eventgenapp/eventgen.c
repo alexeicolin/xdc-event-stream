@@ -1,7 +1,7 @@
 #include <xdc/std.h>
 #include <xdc/runtime/System.h>
 
-#include <eventgen/EventGen.h>
+#include <EventGen.h>
 
 /* A simple app for playing around with log events */
 

@@ -4,5 +4,7 @@ package eventgenapp {
     module OutputChannel;
     module ConsoleChannel;
     module TivaUartChannel;
+
+    module EventGen;
 };
 

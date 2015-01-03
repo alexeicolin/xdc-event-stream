@@ -80,8 +80,9 @@ for each (var targ in Build.targets) {
         defs: DEFS[targ.name],
     };
 
+    // Main library
     var lib = Pkg.addLibrary("lib/" + Pkg.name, targ)
-    lib.addObjects(["OutputChannel.c"], libAttrs);
+    lib.addObjects(["OutputChannel.c", "EventGen.c"], libAttrs);
 
     var lib = Pkg.addLibrary("lib/console_channel", targ)
     lib.addObjects(["ConsoleChannel.c"], libAttrs);

@@ -8,3 +8,5 @@ IOutputChannel.h
 OutputChannel.h
 ConsoleChannel.h
 TivaUartChannel.h
+
+EventGen.h

@@ -1,5 +1,0 @@
-package eventgen
-{
-    module EventGen;
-};
-
