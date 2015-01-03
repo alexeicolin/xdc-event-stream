@@ -47,7 +47,7 @@ Build Prerequisites
 ===================
 
 The `build-env.sh` script shows the environment variables that need to be set to the
-path of each dependency.
+path of each dependency. Customize it and source it by `. ./build-env.sh`.
 
 XDCTools
 --------
