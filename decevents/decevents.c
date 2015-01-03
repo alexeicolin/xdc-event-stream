@@ -41,14 +41,20 @@ Int main(Int argc, Char* argv[])
     Error_init(&eb);
 
     while ((numEvents = EventDecoder_readEvent(fmt, sizeof(fmt), &ev, &eb)) > 0) {
-        /* TODO: this logic is duplicated in EventEncoder */
-        System_printf("%05u:%05u:%010u ",
-            /* Up-to-date ticks in Clock module state */
-            ev.timestamp.hi >> 16,
-            /* Timestamp ticks: together with current timer value makes up
-             * the elapsed time. */
-            ev.timestamp.hi & 0xffff,
-            ev.timestamp.lo); /* current timer value */
+        switch (EventRecord_hasTimestamp) {
+            case EventRecord_TimestampMode_US:
+            case EventRecord_TimestampMode_COUNTS:
+                System_printf("%010lu:%010lu ", ev.timestamp.hi, ev.timestamp.lo);
+            case EventRecord_TimestampMode_RAW: /* Clock_ticks:Timer_counter */
+                System_printf("%05u:%05u:%010lu ",
+                    /* Up-to-date ticks in Clock module state */
+                    ev.timestamp.hi >> 16,
+                    /* Timestamp ticks: together with current timer value makes up
+                     * the elapsed time. */
+                    ev.timestamp.hi & 0xffff,
+                    ev.timestamp.lo); /* current timer value */
+                break;
+        }
         if (EventRecord_hasModuleId)
             System_printf("%d ", ev.modid);
         System_printf(fmt, ev.arg[0], ev.arg[1], ev.arg[2],
