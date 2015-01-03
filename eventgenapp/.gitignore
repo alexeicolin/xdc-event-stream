@@ -3,3 +3,8 @@
 *.mak
 lib/
 package/
+
+IOutputChannel.h
+OutputChannel.h
+ConsoleChannel.h
+TivaUartChannel.h
